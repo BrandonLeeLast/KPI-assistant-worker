@@ -1,0 +1,9 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "kpi-assistant-ai",
+	"main": "src/index.ts",
+	"compatibility_date": "2024-01-01",
+	"observability": { "enabled": true },
+	"upload_source_maps": true,
+	"ai": { "binding": "AI" }
+}
