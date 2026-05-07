@@ -8,7 +8,7 @@
  * Response: { response: string }
  */
 
-const WORKER_VERSION = "1.0.0";
+const WORKER_VERSION = "1.0.2";
 
 interface Env {
   AI: Ai;
@@ -24,7 +24,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
 
     const corsHeaders = {
-      "Access-Control-Allow-Origin":  "*",
+      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, X-Auth-Token",
     };
@@ -65,11 +65,9 @@ export default {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { 
-                type: "image_url", 
-                image_url: { 
-                  url: `data:image/jpeg;base64,${image_base64}` 
-                } 
+              {
+                type: "image",
+                image: image_base64
               }
             ]
           }
@@ -78,7 +76,12 @@ export default {
       });
 
       // Extract text from response
-      const text: string = result?.response ?? result?.choices?.[0]?.message?.content ?? "";
+      let text: string = result?.response ?? result?.choices?.[0]?.message?.content ?? "";
+
+      if (!text || text.trim().length === 0) {
+        text = "AI Error: The model processed the image but did not generate a summary. Please try again or check your Cloudflare Workers AI limits.";
+      }
+
       return Response.json({ response: text }, { headers: corsHeaders });
 
     } catch (err: any) {
