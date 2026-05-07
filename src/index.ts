@@ -8,7 +8,7 @@
  * Response: { response: string }
  */
 
-const WORKER_VERSION = "1.0.2";
+const WORKER_VERSION = "1.0.3";
 
 interface Env {
   AI: Ai;
@@ -59,19 +59,15 @@ export default {
 
     // ── Call Gemma 4 vision model ───────────────────────────────────────────
     try {
+      // For Gemma models on Workers AI, image must be top-level, not in messages content array
       const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
         messages: [
           {
             role: "user",
-            content: [
-              { type: "text", text: prompt },
-              {
-                type: "image",
-                image: image_base64
-              }
-            ]
+            content: prompt
           }
         ],
+        image: image_base64,
         max_tokens: 1024,
       });
 
