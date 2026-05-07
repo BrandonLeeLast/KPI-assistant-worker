@@ -8,6 +8,8 @@
  * Response: { response: string }
  */
 
+const WORKER_VERSION = "1.0.0";
+
 interface Env {
   AI: Ai;
 }
@@ -23,13 +25,19 @@ export default {
 
     const corsHeaders = {
       "Access-Control-Allow-Origin":  "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, X-Auth-Token",
     };
 
     // ── CORS preflight ──────────────────────────────────────────────────────
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
+    }
+
+    // ── Version endpoint ────────────────────────────────────────────────────
+    const url = new URL(request.url);
+    if (request.method === "GET" && url.pathname === "/version") {
+      return Response.json({ version: WORKER_VERSION }, { headers: corsHeaders });
     }
 
     if (request.method !== "POST") {
