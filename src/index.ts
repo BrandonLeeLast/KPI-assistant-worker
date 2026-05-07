@@ -65,7 +65,12 @@ export default {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: `data:image/jpeg;base64,${image_base64}` }
+              { 
+                type: "image_url", 
+                image_url: { 
+                  url: `data:image/jpeg;base64,${image_base64}` 
+                } 
+              }
             ]
           }
         ],
