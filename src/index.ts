@@ -8,7 +8,7 @@
  * Response: { response: string }
  */
 
-const WORKER_VERSION = "1.0.5";
+const WORKER_VERSION = "1.0.6";
 
 interface Env {
   AI: Ai;
@@ -59,22 +59,24 @@ export default {
 
     // ── Call Gemma 4 vision model ───────────────────────────────────────────
     try {
-      // 1.0.5 Fix: Strictly use string-based content to avoid 5006 error.
-      // We add a system message to prime the model for visual analysis.
-      const result = await env.AI.run("@cf/google/gemma-4-26b-a4b-it", {
+      const result = await (env.AI.run as any)("@cf/google/gemma-4-26b-a4b-it", {
         messages: [
-          { role: "system", content: "You are a visual analysis assistant. Look at the attached image carefully." },
-          { role: "user", content: prompt }
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: `data:image/jpeg;base64,${image_base64}` }
+            ]
+          }
         ],
-        image: image_base64,
         max_tokens: 1024,
       });
 
       // Extract text from response
       let text: string = result?.response ?? result?.choices?.[0]?.message?.content ?? "";
-      
+
       if (!text || text.trim().length === 0) {
-        text = "AI Error: The model processed the image but did not generate a summary. This can happen if the image is too complex or Cloudflare's vision service is under high load.";
+        text = "AI Error: The model returned an empty response.";
       }
 
       return Response.json({ response: text }, { headers: corsHeaders });
