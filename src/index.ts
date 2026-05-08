@@ -59,21 +59,27 @@ export default {
 
     // ── Call Gemma 4 vision model ───────────────────────────────────────────
     try {
+      // Convert base64 to byte array — CF Workers AI binding expects binary, not data URL
+      const binaryString = atob(image_base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
       const result = await (env.AI.run as any)("@cf/google/gemma-4-26b-a4b-it", {
         messages: [
           {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: `data:image/jpeg;base64,${image_base64}` }
+              { type: "image", image: Array.from(bytes) }
             ]
           }
         ],
         max_tokens: 1024,
       });
 
-      // Extract text from response
-      let text: string = result?.response ?? result?.choices?.[0]?.message?.content ?? "";
+      let text: string = result?.response ?? "";
 
       if (!text || text.trim().length === 0) {
         text = "AI Error: The model returned an empty response.";
