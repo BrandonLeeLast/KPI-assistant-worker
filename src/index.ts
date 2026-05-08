@@ -8,7 +8,7 @@
  * Response: { response: string }
  */
 
-const WORKER_VERSION = "1.0.6";
+const WORKER_VERSION = "1.0.7";
 
 interface Env {
   AI: Ai;
@@ -59,12 +59,7 @@ export default {
 
     // ── Call Gemma 4 vision model ───────────────────────────────────────────
     try {
-      // Convert base64 to byte array — CF Workers AI binding expects binary, not data URL
-      const binaryString = atob(image_base64);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
+      const dataUrl = `data:image/png;base64,${image_base64}`;
 
       const result = await (env.AI.run as any)("@cf/google/gemma-4-26b-a4b-it", {
         messages: [
@@ -72,7 +67,7 @@ export default {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image", image: Array.from(bytes) }
+              { type: "image_url", image_url: { url: dataUrl } }
             ]
           }
         ],
