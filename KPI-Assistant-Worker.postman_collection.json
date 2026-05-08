@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "KPI Assistant Worker",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://kpi-assistant-ai.<your-subdomain>.workers.dev",
+      "type": "string"
+    },
+    {
+      "key": "local_url",
+      "value": "http://localhost:8787",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "GET /version",
+      "request": {
+        "method": "GET",
+        "url": "{{local_url}}/version",
+        "description": "Returns the current worker version string."
+      }
+    },
+    {
+      "name": "POST /analyze-image (local)",
+      "request": {
+        "method": "POST",
+        "url": "{{local_url}}/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image_base64\": \"{{image_base64}}\",\n  \"prompt\": \"Describe the KPIs visible in this screenshot.\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Send a base64-encoded PNG and a prompt. Set the `image_base64` collection variable to a real base64 string before running."
+      }
+    },
+    {
+      "name": "POST /analyze-image (production)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"image_base64\": \"{{image_base64}}\",\n  \"prompt\": \"Describe the KPIs visible in this screenshot.\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Same as above but targets the deployed worker. Update `base_url` with your actual workers.dev subdomain."
+      }
+    },
+    {
+      "name": "POST /analyze-image (missing fields — 400)",
+      "request": {
+        "method": "POST",
+        "url": "{{local_url}}/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"What do you see?\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Omits image_base64 — should return 400 with an error message."
+      }
+    },
+    {
+      "name": "POST /analyze-image (bad JSON — 400)",
+      "request": {
+        "method": "POST",
+        "url": "{{local_url}}/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "not json at all",
+          "options": { "raw": { "language": "json" } }
+        },
+        "description": "Sends invalid JSON — should return 400 Invalid JSON body."
+      }
+    },
+    {
+      "name": "OPTIONS / (CORS preflight)",
+      "request": {
+        "method": "OPTIONS",
+        "url": "{{local_url}}/",
+        "header": [
+          { "key": "Origin", "value": "http://localhost:3000" },
+          { "key": "Access-Control-Request-Method", "value": "POST" }
+        ],
+        "description": "Preflight check — should return 200 with CORS headers."
+      }
+    },
+    {
+      "name": "DELETE / (method not allowed — 405)",
+      "request": {
+        "method": "DELETE",
+        "url": "{{local_url}}/",
+        "description": "Any non-POST/GET/OPTIONS method — should return 405."
+      }
+    }
+  ]
+}

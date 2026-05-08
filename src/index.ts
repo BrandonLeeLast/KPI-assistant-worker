@@ -8,7 +8,7 @@
  * Response: { response: string }
  */
 
-const WORKER_VERSION = "1.0.7";
+const WORKER_VERSION = "1.0.8";
 
 interface Env {
   AI: Ai;
@@ -74,7 +74,7 @@ export default {
         max_tokens: 1024,
       });
 
-      let text: string = result?.response ?? "";
+      let text: string = result?.response ?? result?.choices?.[0]?.message?.content ?? "";
 
       if (!text || text.trim().length === 0) {
         text = "AI Error: The model returned an empty response.";
